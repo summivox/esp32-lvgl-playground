@@ -65,3 +65,14 @@
   T(T const&) = delete;                \
   void operator=(T const& t) = delete; \
   T(T&&) = delete;
+
+/// Implement factory pattern with parameterized ctor and `esp_err_t Setup()`
+#define DEFINE_CREATE(CLASS)                                         \
+  template <typename... T>                                           \
+  static std::unique_ptr<CLASS> Create(T&&... arg) {                 \
+    std::unique_ptr<CLASS> self{new CLASS(std::forward<T>(arg)...)}; \
+    if (self->Setup() != ESP_OK) {                                   \
+      self.reset();                                                  \
+    }                                                                \
+    return self;                                                     \
+  }
